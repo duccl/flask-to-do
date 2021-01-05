@@ -18,7 +18,7 @@ def add_tasks():
     return new_task.to_json()
 
 @app.route("/task/update",methods=["POST"])
-def update_tasks():
+def update_task():
     data = json.loads(request.data)
     task_to_update = tasks.get(data.get('id'))
     if task_to_update:
@@ -26,6 +26,16 @@ def update_tasks():
         tasks[task_to_update.id] = task_to_update
         return task_to_update.to_json(['id','status'])
     return make_response('NOT FOUND',404)
+
+@app.route("/task/delete",methods=["POST"])
+def delete_task():
+    data = json.loads(request.data)
+    task_to_remove = tasks.get(data.get('id'))
+    if task_to_remove:
+        del tasks[task_to_remove.id]
+        return json.dumps({'removed':True})
+    return make_response('NOT FOUND',404)
+
 
 if __name__ == "__main__":
     if os.environ.get("PRODUCTION"):
