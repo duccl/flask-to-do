@@ -23,11 +23,5 @@ class Task(BaseModel):
         self.task_owner = task_owner
         self.status = "To do"
 
-    def close_task(self):
-        self.status = "Done"
-    
-    def doing_task(self):
-        self.status = "Doing"
-
     def __str__(self):
         return self.task_name

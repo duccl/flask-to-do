@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask,request, make_response
 from models import Task
 import os
 import json
@@ -17,6 +17,15 @@ def add_tasks():
     tasks[new_task.id] = new_task
     return new_task.to_json()
 
+@app.route("/task/update",methods=["POST"])
+def update_tasks():
+    data = json.loads(request.data)
+    task_to_update = tasks.get(data.get('id'))
+    if task_to_update:
+        task_to_update.status = data.get('status')
+        tasks[task_to_update.id] = task_to_update
+        return task_to_update.to_json(['id','status'])
+    return make_response('NOT FOUND',404)
 
 if __name__ == "__main__":
     if os.environ.get("PRODUCTION"):
