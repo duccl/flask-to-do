@@ -39,6 +39,6 @@ def delete_task():
 
 if __name__ == "__main__":
     if os.environ.get("PRODUCTION"):
-        app.run()
+        app.run(host=os.environ.get('FLASK_HOST'))
     else:
         app.run(debug=True)
