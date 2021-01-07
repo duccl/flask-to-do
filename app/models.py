@@ -17,11 +17,13 @@ class BaseModel:
 class Task(BaseModel):
     def __init__(self,
                  task_name:str,
-                 task_owner:str):
+                 task_owner:str,
+                 task_endpoint:str):
         super().__init__()
         self.task_name = task_name
         self.task_owner = task_owner
         self.status = "To do"
+        self.link = f'{task_endpoint}/{self.id}'
 
     def __str__(self):
         return self.task_name

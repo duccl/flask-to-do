@@ -1,23 +1,33 @@
 from flask import Flask,request, make_response
 from models import Task
+from utils import URLS,TASK_ROOT
 import os
 import json
 
 app = Flask(__name__)
 tasks = {}
 
-@app.route("/task/list")
+@app.route(URLS.get('list_task'))
 def list_tasks():
-    return json.dumps(list(map(lambda _key: tasks.get(_key).to_json(),tasks)))
+    return json.dumps(list(map(lambda _key: tasks.get(_key).__dict__,tasks)))
 
-@app.route("/task/add",methods=["POST"])
+@app.route(URLS.get('add_task'),methods=["POST"])
 def add_tasks():
     data = json.loads(request.data)
-    new_task = Task(task_name=data.get("task_name"),task_owner=data.get("task_owner"))
+    new_task = Task(task_name=data.get("task_name"),
+                    task_owner=data.get("task_owner"),
+                    task_endpoint=TASK_ROOT)
     tasks[new_task.id] = new_task
     return new_task.to_json()
 
-@app.route("/task/update",methods=["POST"])
+@app.route(URLS.get('get_task'))
+def get_task(uuid):
+    task = tasks.get(uuid)
+    if task:
+        return task.to_json()
+    return make_response('NOT FOUND',404)
+
+@app.route(URLS.get('update_task'),methods=["POST"])
 def update_task():
     data = json.loads(request.data)
     task_to_update = tasks.get(data.get('id'))
@@ -27,7 +37,7 @@ def update_task():
         return task_to_update.to_json(['id','status'])
     return make_response('NOT FOUND',404)
 
-@app.route("/task/delete",methods=["POST"])
+@app.route(URLS.get('delete_task'),methods=["POST"])
 def delete_task():
     data = json.loads(request.data)
     task_to_remove = tasks.get(data.get('id'))
