@@ -1,18 +1,17 @@
 from uuid import uuid1
-from json import dumps
 from typing import List
 
 class BaseModel:
     def __init__(self):
         self.id = uuid1().hex
     
-    def to_json(self,projection:List[str] = None):
+    def to_dict(self,projection:List[str] = None):
         if not projection:
-            return dumps(self.__dict__)
-        data_to_dump_as_json = {}
+            return self.__dict__
+        data_to_dump = {}
         for field in projection:
-            data_to_dump_as_json[field] = self.__dict__.get(field)
-        return dumps(data_to_dump_as_json,indent=4)
+            data_to_dump[field] = self.__dict__.get(field)
+        return data_to_dump
 
 class Task(BaseModel):
     def __init__(self,
