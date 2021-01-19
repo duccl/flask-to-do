@@ -1,6 +1,6 @@
 from typing import Any, List, Dict
 from uuid import uuid1
-from sqlalchemy import Column,Integer,String,ForeignKey
+from sqlalchemy import Column,CheckConstraint,String,ForeignKey
 from sqlalchemy.orm import relationship,backref
 import database_context as database
 
@@ -32,8 +32,7 @@ class BaseModel:
                     lambda attribute: self.project_attribute(attribute),
                     self.__dict__
                 )
-            )
-            
+            )   
         )
 
     @classmethod
@@ -68,6 +67,8 @@ class BaseModel:
     def __str__(self):
         return self.id
 
+    init_id_if_necessary = staticmethod(init_id_if_necessary)
+
 class User(database.Base,BaseModel):
     __tablename__ = 'tblUsers'
     id = Column(String(200),primary_key=True)
@@ -82,13 +83,27 @@ class Task(database.Base,BaseModel):
     id = Column(String(200),primary_key=True)
     title = Column(String(200),nullable=False)
     link = Column(String(200))
+    status = Column(String(30))
     owner_id = Column(String(200),ForeignKey('tblUsers.id',ondelete='CASCADE'))
     owner = relationship('User',
             back_populates='tasks')
+    
+    CheckConstraint("status = 'Doing' or status = 'Done' or status = 'To Do'",
+                    name='status_CheckConstraint')
 
-    def create_link_to_self(self,endpoint_to_query_self:str):
-        self.init_id_if_necessary()
-        self.link = f'{endpoint_to_query_self}/{self.id}'
+    def __init__(self,*args,**kwargs) -> None:
+        super().__init__(*args,**kwargs)
+        self.status = "To Do"
+        self.create_link_to_self()
+
+    @BaseModel.init_id_if_necessary
+    def create_link_to_self(self):
+        if self.link:
+            self.link += f'/{self.id}'
+
+    def update(self, attributes_to_change: Dict[str, str]):
+        if 'status' in attributes_to_change:
+            super().update({'status':attributes_to_change['status']})
 
     def __str__(self):
         return self.title  

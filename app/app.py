@@ -67,7 +67,7 @@ class TaskController(Resource):
         return task_to_update.to_dict()
 
     def get(self,uuid):
-        return self.retrieve_task(uuid)
+        return self.retrieve_task(uuid).to_dict()
 
 api.add_resource(UserController,f'/api/{VERSION}/user/<string:uuid>')
 api.add_resource(UsersController,f'/api/{VERSION}/users')
