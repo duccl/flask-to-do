@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 api = Api(app)
-VERSION = os.environ.get('TASK_API_VERSION') if os.environ.get('TASK_API_VERSION') else 'v1.0'
+VERSION = os.environ.get('TASK_API_VERSION') if os.environ.get('TASK_API_VERSION') else 'v1'
 
 class UsersController(Resource):
     model = User
@@ -63,7 +63,8 @@ class TaskController(Resource):
 
     def put(self,uuid):
         task_to_update = self.retrieve_task(uuid)
-        return task_to_update
+        task_to_update.update(request.get_json())
+        return task_to_update.to_dict()
 
     def get(self,uuid):
         return self.retrieve_task(uuid)
@@ -72,6 +73,7 @@ api.add_resource(UserController,f'/api/{VERSION}/user/<string:uuid>')
 api.add_resource(UsersController,f'/api/{VERSION}/users')
 api.add_resource(TaskController,f'/api/{VERSION}/task/<string:uuid>')
 api.add_resource(TasksController,f'/api/{VERSION}/tasks')
+
 
 if __name__ == "__main__":
     if os.environ.get("PRODUCTION"):

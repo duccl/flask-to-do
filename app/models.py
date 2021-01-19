@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict
 from uuid import uuid1
 from sqlalchemy import Column,Integer,String,ForeignKey
 from sqlalchemy.orm import relationship,backref
@@ -9,15 +9,17 @@ class BaseModel:
     id = None
 
     def init_id_if_necessary(function):
-        def wrapps(self):
+        def wrapps(self,*args,**kwargs):
             if not self.id:
                 self.id = uuid1().hex
-            function(self)
+            function(self,*args,**kwargs)
         return wrapps
     
     def project_attribute(self, name: str) -> Any:
         if callable(self.__dict__.get(name)) or name.startswith('_'):
             return None
+        elif hasattr(self.__dict__.get(name),'to_dict'):
+            return name,self.__dict__.get(name).to_dict()
         return name,self.__dict__.get(name) 
 
     def to_dict(self,projection:List[str]=None):
@@ -54,6 +56,13 @@ class BaseModel:
     def save(self):
         session = database.Session()
         session.add(self)
+        session.commit()
+
+    @init_id_if_necessary
+    def update(self, attributes_to_change:Dict[str,str]):
+        session = database.Session()
+        for key in attributes_to_change:
+            self.__setattr__(key,attributes_to_change[key])
         session.commit()
 
     def __str__(self):
