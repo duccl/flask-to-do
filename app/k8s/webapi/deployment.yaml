@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api
+        image: duccl/flask-to-do-image:v2
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+          - name: DATABASE_URL
+            value: postgresql+psycopg2://postgres:postpas@postgresdb:5432/postgres
+          - name: FLASK_HOST
+            value: 0.0.0.0
+          - name: PRODUCTION
+            value: '1'
+          - name: TASK_API_VERSION
+            value: v1
+        ports:
+        - containerPort: 5000
