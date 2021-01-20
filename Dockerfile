@@ -1,13 +1,13 @@
-FROM ubuntu:latest
-WORKDIR /home/local
-
-COPY . .
-RUN chmod 777 app/main.py
-RUN apt update
-RUN apt install -y python3-pip
+FROM ubuntu
+WORKDIR /app
+RUN apt-get update -y && apt-get install python3 -y
+RUN apt-get install libpq-dev python3-dev -y
+RUN apt-get install python3-psycopg2 -y
+COPY requirements.txt .
+RUN apt install python3-pip -y
+RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-ENV FLASK_HOST="0.0.0.0"
-ENV PRODUCTION=1
-ENV TASK_API_VERSION="1.0"
-ENTRYPOINT [ "/home/local/entrypoint.sh" ]
+COPY ./app .
+COPY entrypoint.sh .
+ENTRYPOINT [ "./entrypoint.sh" ]
 EXPOSE 5000
