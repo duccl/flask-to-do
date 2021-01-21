@@ -1,7 +1,9 @@
 from typing import Any, List, Dict
 from uuid import uuid1
 from sqlalchemy import Column,CheckConstraint,String,ForeignKey
-from sqlalchemy.orm import relationship,backref
+from sqlalchemy.orm import relationship
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash,check_password_hash
 import database_context as database
 
 class BaseModel:
@@ -69,11 +71,19 @@ class BaseModel:
 
     init_id_if_necessary = staticmethod(init_id_if_necessary)
 
-class User(database.Base,BaseModel):
+class User(UserMixin,database.Base,BaseModel):
     __tablename__ = 'tblUsers'
     id = Column(String(200),primary_key=True)
     name = Column(String(200),nullable=False)
+    password = Column(String(256),nullable=False)
     tasks = relationship('Task',cascade='all, delete')
+
+    def __init__(self,**kwargs) -> None:
+        super().__init__(**kwargs)
+        self.password = generate_password_hash(self.password,method='sha256')
+
+    def is_password_valid(self,password):
+        return check_password_hash(self.password,password)
 
     def __str__(self) -> str:
         return self.name
